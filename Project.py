@@ -1,6 +1,6 @@
 import openpyxl
 from collections import Counter
-f = openpyxl.load_workbook(r"C:\Users\So young\Desktop\aum123.xlsx")
+f = openpyxl.load_workbook(r"C:\Users\MR-X\Desktop\aum123.xlsx")
 sheet = f.active
 
 name = []
@@ -24,12 +24,9 @@ for i in name:
 def RatioCheck():
     ratio = []
     for i in range(7):
-        m = w = 0
-        for j in range(len(regions[i])):
-            if regions[i][j][1] == '여자':
-                w += 1
-            else:
-                m += 1
+        s = list(map(list, zip(*regions[i])))[1]
+        w = s.count('여자')
+        m = s.count('남자')
         ratio.append((round(w * 100 / (w + m), 1), round(m * 100 / (w + m), 1)))
     return ratio
 
@@ -39,6 +36,13 @@ def PersonCheck():
     for i in range(7):
         ppl.append(len(regions[i]) - r_max_people[i])
     return ppl
+
+def GetManRatio():
+    s = list(map(list, zip(*regions[i])))[1]
+    m = s.count('남자')
+    w = s.count('여자')
+    manratio = round(m * 100 / (w + m), 1)
+    return manratio
 
 ratio = RatioCheck()
 for i in range(7):
@@ -51,7 +55,7 @@ print(regions[0])
 ages = list(map(list, zip(*regions[0])))[2]
 print(ages)
 
-for _ in range(10): # While
+for _ in range(20): # While
     print("ATTEMPT {}".format(_))
     ppl = PersonCheck()
     isChanged = 0
@@ -63,23 +67,35 @@ for _ in range(10): # While
         elif ppl[i] > 0:
             print('Too many people in {}, pushing people to temporary list...'.format(g))
             for j in range(ppl[i]):
-                cnt = Counter(list(map(list, zip(*regions[i])))[2])
-                most_age = cnt.most_common(1)[0][0]
-                print('MODE AGE : {}'.format(most_age))
                 for a in regions[i]:
-                    print(a)
-                    if a[1] == '여자' and a[2] == most_age:
-                        print("Pushing {} into temp...".format(a[0]))
+                    cnt = Counter(list(map(list, zip(*regions[i])))[2])
+                    most_age = cnt.most_common(1)[0][0]
+                    manratio = GetManRatio()
+                    if manratio <= 40:
+                        if a[1] == '여자' and a[2] == most_age:
+                            print("Pushing {} into temp...".format(a[0]))
+                            temp.append(a)
+                            regions[i].pop(regions[i].index(a))
+                            isChanged = 1
+                    elif manratio > 40:
+                        if a[1] == '남자' and a[2] == most_age:
+                            print("Pushing {} into temp...".format(a[0]))
+                            temp.append(a)
+                            regions[i].pop(regions[i].index(a))
+                            isChanged = 1
 
-                        temp.append(a)
-                        regions[i].pop(regions[i].index(a))
-                    else:
-                        continue
-
-            isChanged = 1
+        # 로직상 성비를 맞추기 위해 거르기 + 나이 거르기 동시에 걸러지는 게 없을 때 옮기지 못한다.
 
         else:
             print('Low people in {}, pulling people from temporary list...'.format(g))
+            for a in temp:
+                manratio = GetManRatio()
+                if manratio <= 40:
+                    if a[1] == '남자' and a[4] == 'ABCDEFG'[i]:
+                        regions[i].append(temp.pop(temp.index(a)))
+                else:
+                    if a[1] == '여자' and a[4] == 'ABCDEFG'[i]:
+                        regions[i].append(temp.pop(temp.index(a)))
             if not temp:
                 print('No people in temporary list, continue...'.format(g))
             else:
@@ -88,5 +104,20 @@ for _ in range(10): # While
         break
 
 for i in range(7):
-    print(regions[i])
+    print(len(regions[i]),end=', ')
+print()
+print(regions[2])
 print(RatioCheck())
+
+wb = openpyxl.Workbook()
+ws = wb.active
+ws.title = 'Sheet'
+
+for i in range(7):
+    for r in range(len(regions[i])):
+        for k in range(5):
+            ws.cell(row=r+1, column=i*5+k+1).value = regions[i][r][k]
+for r in range(len(temp)):
+    for k in range(5):
+        ws.cell(row=r+1, column=36+k).value = temp[r][k]
+wb.save(r'test.xlsx')
