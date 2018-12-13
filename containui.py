@@ -125,7 +125,6 @@ class Aum(QWidget):
         w = genders.count('여자')
         m = genders.count('남자')
         ALL_MAN_RATIO = round(m * 100 / (w + m), 1)
-        self.textBrowser.append("\n총 인원 : {}명, 전체 성비 -> W {} : M {}\n".format(len(name), 100 - ALL_MAN_RATIO, ALL_MAN_RATIO))
 
         # 각 배열에 그룹 입력
         NUMBERS_OF_REGIONS = int(numberofgroup)
@@ -164,14 +163,14 @@ class Aum(QWidget):
                             manratio = GetManRatio()
                             if manratio < ALL_MAN_RATIO:
                                 if a[1] == '여자' and a[2] == most_age and a[6] == '신규':
-                                    self.textBrowser.append("Pushing {} into temp...".format(a[0]))
+                                    self.textBrowser.append("Pushing {} into temporary list...".format(a[0]))
                                     temp.append(a)
                                     regions[i].pop(regions[i].index(a))
                                     isChanged = 1
                                     break
                             else:
                                 if a[1] == '남자' and a[2] == most_age and a[6] == '신규':
-                                    self.textBrowser.append("Pushing {} into temp...".format(a[0]))
+                                    self.textBrowser.append("Pushing {} into temporary list...".format(a[0]))
                                     temp.append(a)
                                     regions[i].pop(regions[i].index(a))
                                     isChanged = 1
@@ -184,14 +183,34 @@ class Aum(QWidget):
                                 manratio = GetManRatio()
                                 if manratio < ALL_MAN_RATIO:
                                     if a[1] == '여자' and a[6] == '신규':
-                                        self.textBrowser.append("Pushing {} into temp...".format(a[0]))
+                                        self.textBrowser.append("Pushing {} into temporary list...".format(a[0]))
                                         temp.append(a)
                                         regions[i].pop(regions[i].index(a))
                                         isChanged = 1
                                         break
                                 else:
                                     if a[1] == '남자' and a[6] == '신규':
-                                        self.textBrowser.append("Pushing {} into temp...".format(a[0]))
+                                        self.textBrowser.append("Pushing {} into temporary list...".format(a[0]))
+                                        temp.append(a)
+                                        regions[i].pop(regions[i].index(a))
+                                        isChanged = 1
+                                        break
+                    if not isChanged:
+                        self.textBrowser.append("Members are all old, pulling old members...")
+                        ppl = PersonCheck()
+                        for j in range(ppl[i]):
+                            for a in regions[i]:
+                                manratio = GetManRatio()
+                                if manratio < ALL_MAN_RATIO:
+                                    if a[1] == '여자' and a[6] == '기존':
+                                        self.textBrowser.append("Pushing {} into temporary list...".format(a[0]))
+                                        temp.append(a)
+                                        regions[i].pop(regions[i].index(a))
+                                        isChanged = 1
+                                        break
+                                else:
+                                    if a[1] == '남자' and a[6] == '기존':
+                                        self.textBrowser.append("Pushing {} into temporary list...".format(a[0]))
                                         temp.append(a)
                                         regions[i].pop(regions[i].index(a))
                                         isChanged = 1
@@ -205,12 +224,12 @@ class Aum(QWidget):
                             manratio = GetManRatio()
                             if manratio < ALL_MAN_RATIO:
                                 if a[1] == '남자' and a[4] == reg[i]:
-                                    self.textBrowser.append("Pulling {} from temp...".format(a[0]))
+                                    self.textBrowser.append("Pulling {} from temporary list...".format(a[0]))
                                     regions[i].append(temp.pop(temp.index(a)))
                                     isChanged = 1
                             else:
                                 if a[1] == '여자' and a[4] == reg[i]:
-                                    self.textBrowser.append("Pulling {} from temp...".format(a[0]))
+                                    self.textBrowser.append("Pulling {} from temporary list...".format(a[0]))
                                     regions[i].append(temp.pop(temp.index(a)))
                                     isChanged = 1
                     if not isChanged:
@@ -242,8 +261,9 @@ class Aum(QWidget):
 
         wb.save(r'aumpeople_sorted.xlsx')
         self.exitButton.setEnabled(True)
-
-        self.textBrowser.append("\n" * 20 + "======" * 10)
+        self.textBrowser.append("\n" * 20 )
+        self.textBrowser.append("\n총 인원 : {}명, 전체 성비 -> W {} : M {}\n".format(len(name), 100 - ALL_MAN_RATIO, ALL_MAN_RATIO))
+        self.textBrowser.append("======" * 10)
         self.textBrowser.append("자동 배치가 완료되었습니다.\n"
               "해당 배치는 엑셀 순번에 따라 정원수를 기준으로 작성되었습니다. \n최종 합격자 명단은 아닙니다.\n"
               "임시 정원외 명단으로 배치된 경우는 :\n1. 그룹의 정원 초과\n2. 그룹 내 성비 조정\n"
