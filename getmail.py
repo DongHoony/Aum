@@ -2,25 +2,17 @@ from selenium import webdriver
 import openpyxl
 from time import sleep
 from math import ceil
-driver = webdriver.Chrome('chromedriver.exe')
-
-driver.get('https://nid.naver.com/nidlogin.login')
-
-
-input("Enter if you're ready")
-
 from bs4 import BeautifulSoup
 
+driver = webdriver.Chrome('chromedriver.exe')
+driver.get('https://nid.naver.com/nidlogin.login')
+input("Enter if you're ready")
 driver.get("https://mail.naver.com")
-
 file = openpyxl.load_workbook('mail_sort.xlsx')
 sheet = file.active
-
-howmany = int(input("How many pages?"))
-howmany = ceil(howmany/10)
-
+howmany = ceil(int(input("How many pages?"))/10)
 try:
-    for pages in range(8):
+    for pages in range(howmany):
         for buttons in range(10):
             sleep(0.3)
             html = driver.page_source
